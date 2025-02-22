@@ -1,36 +1,109 @@
-import { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import reactLogo from './assets/react.svg'
+import { createRoot } from 'react-dom/client'
 import viteLogo from '/vite.svg'
 import './App.css'
-import { APIProvider, Map } from '@vis.gl/react-google-maps'
+import { APIProvider, GoogleMapsContext, Map, useMap, useMapsLibrary } from '@vis.gl/react-google-maps'
 
-function App() {
-  const [count, setCount] = useState(0)
+
+const GOOGLE_API_KEY = (import.meta.env.VITE_GOOGLE_MAPS_API_KEY)!
+
+const App = () => (
+  <APIProvider apiKey={GOOGLE_API_KEY}>
+    <Map
+      defaultZoom={9}
+      defaultCenter={{lat: 43.65, lng: -79.38}}
+      gestureHandling={'greedy'}
+      fullscreenControl = {false}>
+      disableDefaultUI={true}
+      <Directions />
+    </Map>
+  </APIProvider>
+);
+
+function Directions(){
+  const map = useMap();
+  const routesLibrary = useMapsLibrary('routes');
+  const [directionsService, setDirectionsService] =
+    useState<google.maps.DirectionsService>();
+  const [directionsRenderer, setDirectionsRenderer] =
+    useState<google.maps.DirectionsRenderer>();
+  const [routes, setRoutes] = useState<google.maps.DirectionsRoute[]>([]);
+  const [routeIndex, setRouteIndex] = useState(0);
+  const selected = routes[routeIndex];
+  const leg = selected?.legs[0];
+
+  // Initialize directions service/renderer
+  useEffect(() => {
+    if (!routesLibrary || !map) return;
+    setDirectionsService(new routesLibrary.DirectionsService());
+    setDirectionsRenderer(
+      new routesLibrary.DirectionsRenderer({
+        draggable: false,
+        map
+      })
+    );
+  }, [routesLibrary, map]);
+
+  // Use directions Service
+  useEffect(() => {
+    if (!directionsService || !directionsRenderer) return;
+
+    directionsService.route({
+      origin: '115 Madison Ave, Van Buren ME',
+      destination: '348 Fegan Dr, San Clemente CA',
+      travelMode: google.maps.TravelMode.DRIVING,
+      provideRouteAlternatives: true
+    })
+    .then(response => {
+      directionsRenderer.setDirections(response);
+      setRoutes(response.routes);
+    });
+    return () => directionsRenderer.setMap(null);
+  }, [directionsService, directionsRenderer]);
+
+  // Update direction route
+  useEffect(() => {
+    if (!directionsRenderer) return;
+    directionsRenderer.setRouteIndex(routeIndex);
+  }, [routeIndex, directionsRenderer]);
+  
+  if (!leg) return null;
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
+    // div for the directions
+    <div className="directions">
+      <h2>{selected.summary}</h2>
+      <p>
+        {leg.start_address.split(',')[0]} to {leg.end_address.split(',')[0]}
       </p>
-    </>
-  )
-}
+      <p>Distance: {leg.distance?.text}</p>
+      <p>Duration: {leg.duration?.text}</p>
 
-export default App
+      <h2>Other Routes</h2>
+      <ul>
+        {routes.map((route, index) => (
+          <li key={route.summary}>
+            <button onClick={() => setRouteIndex(index)}>
+              {route.summary}
+            </button>
+
+          </li>
+        ))}
+      </ul>
+    </div> 
+  )
+
+
+}
+export default App;
+
+export function renderToDom(container:HTMLElement){
+  const root = createRoot(container);
+
+  root.render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>
+  );
+}
