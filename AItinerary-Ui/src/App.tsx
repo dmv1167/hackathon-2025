@@ -4,22 +4,45 @@ import { createRoot } from 'react-dom/client'
 import viteLogo from '/vite.svg'
 import './App.css'
 import { APIProvider, GoogleMapsContext, Map, useMap, useMapsLibrary } from '@vis.gl/react-google-maps'
+import { json } from 'stream/consumers'
+
+
+type jsonObj = {
+  lat1: number,
+  lng1: number,
+  addr1: string,
+  lat2: number,
+  lng2: number,
+  addr2: string
+}
+
+
+const jsonString = `{"lat1": 55.96577224651859, "lng1": -3.181451871369203, "addr1": "3 Av. du Général Leclerc, 77380 Combs-la-Ville, France", 
+"lat2": 50.722880248014626, "lng2": -3.5320598627471984,"addr2": "Qazhymuqan Munaytpasov St 3, Astana 010000, Kazakhstan"}`
+
+let parsed : jsonObj = JSON.parse(jsonString);
 
 
 const GOOGLE_API_KEY = (import.meta.env.VITE_GOOGLE_MAPS_API_KEY)!
 
-const App = () => (
-  <APIProvider apiKey={GOOGLE_API_KEY}>
+
+const App = () => {
+  return(
+    <APIProvider apiKey={GOOGLE_API_KEY}>
     <Map
       defaultZoom={9}
-      defaultCenter={{lat: 43.65, lng: -79.38}}
-      gestureHandling={'greedy'}
+      defaultCenter={{lat: (parsed.lat1 + parsed.lat2)/2, 
+        lng: (parsed.lng1 + parsed.lng2)/2}}
+      gestureHandling={'none'}
       fullscreenControl = {false}>
-      disableDefaultUI={true}
       <Directions />
     </Map>
   </APIProvider>
-);
+  )
+  // const parsedData = () => JSON.parse(jsonString); 
+}
+
+
 
 function Directions(){
   const map = useMap();
@@ -50,8 +73,8 @@ function Directions(){
     if (!directionsService || !directionsRenderer) return;
 
     directionsService.route({
-      origin: '115 Madison Ave, Van Buren ME',
-      destination: '348 Fegan Dr, San Clemente CA',
+      origin: parsed.addr1,
+      destination: parsed.addr2,
       travelMode: google.maps.TravelMode.DRIVING,
       provideRouteAlternatives: true
     })
