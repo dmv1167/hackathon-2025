@@ -5,8 +5,6 @@ import {
     ChangeEvent
 } from "react";
 
-import 
-
 function App() {
     const [prompt, setPrompt] = useState<string>("");
     const [inputValue, setInputValue] = useState<string>("");
