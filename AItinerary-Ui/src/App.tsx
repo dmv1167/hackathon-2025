@@ -5,49 +5,46 @@ import {
     ChangeEvent
 } from "react";
 
-import OpenAI from 'openai';
-
-const openai = new OpenAI({
-    organization: import.meta.env.VITE_ORGANIZATION_ID,
-    project: import.meta.env.VITE_PROJECT_ID,
-    apiKey: import.meta.env.VITE_OPENAI_API_KEY,
-});
+import 
 
 function App() {
-    const [text, setText] = useState<string>("");
+    const [prompt, setPrompt] = useState<string>("");
     const [inputValue, setInputValue] = useState<string>("");
     const [response, setResponse] = useState<string>("");
 
     const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
-            setText(inputValue);
+            setPrompt(inputValue);
             setInputValue("");
         }
     };
 
     useEffect(() => {
-        if (text.trim() === "") return;
+        if (prompt.trim() === "") return;
 
         const fetchData = async () => {
             try {
-                const completion = await openai.chat.completions.create({
-                    model: "gpt-4o-mini",
-                    messages: [
-                        { role: "system", content: "You are a day trip planner, respond with locations from the web that fulfill what the user asks for." },
-                        { role: "user", content: text }
-                    ],
-                    store: true,
+                const result = await fetch("http://localhost:8080/aicall", {
+                    method: "POST",
+                    headers: {
+                    "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(
+                        { prompt: prompt }
+                    )
                 });
 
-                setResponse(JSON.stringify(completion.choices[0].message));
+                const airespond = await result.json(); // Parse the JSON response body
+                setResponse(airespond.message);
             } catch (error) {
-                console.error("Error fetching data from OpenAI:", error);
+                console.error("Error fetching data:", error);
+                setResponse("An error occurred while fetching data.");
             }
         };
 
         fetchData();
-    }, [text]);
+    }, [prompt]);
 
     return (
         <div style={{ padding: "20px", textAlign: "center" }}>
