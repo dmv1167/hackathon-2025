@@ -195,12 +195,6 @@ details {
     max-width: 1100px;
 }
 
-@keyframes show {
-    from {
-        opacity: 0;
-    }
-}
-
 details[open] > *:not(summary) {
     animation: show 500ms ease-in-out;
 }

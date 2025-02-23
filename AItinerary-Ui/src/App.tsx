@@ -15,10 +15,6 @@ interface Place {
     longitude: number;
 }
 
-interface Places {
-    placeList: Place[];
-}
-
 const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY!;
 
 function AiInput({
@@ -27,14 +23,14 @@ function AiInput({
     setPrompt,
     response,
     setResponse,
-    setPlaces,
+    setDests,
 }: {
     inputValue: string;
     setInputValue: (value: string) => void;
     setPrompt: (value: string) => void;
     response: string;
     setResponse: (value: string) => void;
-    setPlaces: (places: Places) => void;
+    setDests: (places: Place[]) => void;
 }) {
     const handleKeyDown = async (e: KeyboardEvent<HTMLTextAreaElement>) => {
         if (e.key === "Enter" && !e.shiftKey) {
@@ -57,9 +53,9 @@ function AiInput({
                 setResponse(airespond.message);
 
                 // Assuming the response contains a list of places
-                const placesData: Places = JSON.parse(airespond.message);
+                const placesData: Place[] = JSON.parse(airespond.message);
                 console.log("Places data:", placesData); // Debugging log
-                setPlaces(placesData);
+                setDests(placesData);
             } catch (error) {
                 console.error("Error fetching data:", error);
                 setResponse("An error occurred while fetching data.");
@@ -84,6 +80,10 @@ function AiInput({
                     fontSize: "16px",
                 }}
             ></textarea>
+            <div>
+                <strong>Output:</strong>
+                <p>{response}</p>
+            </div>
         </div>
     );
 }
@@ -205,15 +205,33 @@ function MapElement({ start, end }: { start: Place; end: Place }) {
     );
 }
 
+function InfoList({ dests }: { dests: Place[] }) {
+    return (
+        <>
+            {dests.length > 0 &&
+                dests.slice(0, -1).map((_, index) => {
+                    console.log(
+                        "Rendering InfoSection for places:",
+                        dests[index],
+                        dests[index + 1]
+                    ); // Debugging log
+                    return (
+                        <InfoSection
+                            key={index}
+                            start={dests[index]}
+                            end={dests[index + 1]}
+                        />
+                    );
+                })}
+        </>
+    );
+}
+
 function App() {
-    const [dests, setDests] = useState<Places>(() => ({ placeList: [] }));
+    const [dests, setDests] = useState<Place[]>([]);
     const [prompt, setPrompt] = useState<string>("");
     const [inputValue, setInputValue] = useState<string>("");
     const [response, setResponse] = useState<string>("");
-
-    useEffect(() => {
-        console.log("Places state updated:", dests); // Debugging log
-    }, [dests]);
 
     return (
         <>
@@ -239,7 +257,6 @@ function App() {
                 <img src="/better.jpg" alt="sunset drive" id="hero"></img>
             </div>
             <h1 id="col">Have your day planned</h1>
-            <p id="col">Write what you need to have your day planned</p>
 
             <main>
                 <h1 id="col">Have your day planned</h1>
@@ -249,30 +266,11 @@ function App() {
                     setPrompt={setPrompt}
                     response={response}
                     setResponse={setResponse}
-                    setPlaces={setDests}
+                    setDests={setDests}
                 />
                 <button>sendMessage</button>
-                <>{console.log(dests)}</>
-                {dests.placeList.length > 0 &&
-                    dests.placeList.map((place, index) => {
-                        if (index + 1 < dests.placeList.length) {
-                            console.log(
-                                "Rendering InfoSection for places:",
-                                dests,
-                                dests.placeList[index],
-                                dests.placeList[index + 1]
-                            ); // Debugging log
-                            return (
-                                <InfoSection
-                                    key={index}
-                                    start={dests.placeList[index]}
-                                    end={dests.placeList[index + 1]}
-                                />
-                            );
-                        }
-                        return null;
-                    })}
             </main>
+            <InfoList dests={dests} />
         </>
     );
 }
