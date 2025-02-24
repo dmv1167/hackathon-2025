@@ -34,26 +34,24 @@ public class OpenAIController {
     @PostMapping("")
     public ResponseEntity<AiResponse> submitPrompt(@RequestBody AiPrompt prompt) {
 
-        record Locations(
-                @JsonProperty(required = true, value = "places") Places places) {
+        record Places(
+                @JsonProperty(required = true, value = "placeList") Place[] placeList,
+                @JsonProperty(required = true, value = "startLocation") Place startLocation) {
 
-            record Places(
-                    @JsonProperty(required = true, value = "placeList") Place[] placeList) {
-
-                record Place(
-                        @JsonProperty(required = true, value = "information") String information,
-                        @JsonProperty(required = true, value = "address") String address,
-                        @JsonProperty(required = true, value = "latitude") double latitude,
-                        @JsonProperty(required = true, value = "longitude") double longitude) {
-                }
+            record Place(
+                    @JsonProperty(required = true, value = "name") String name,
+                    @JsonProperty(required = true, value = "information") String information,
+                    @JsonProperty(required = true, value = "address") String address,
+                    @JsonProperty(required = true, value = "latitude") double latitude,
+                    @JsonProperty(required = true, value = "longitude") double longitude) {
             }
         }
 
-        BeanOutputConverter<Locations> outputConverter = new BeanOutputConverter<>(Locations.class);
+        BeanOutputConverter<Places> outputConverter = new BeanOutputConverter<>(Places.class);
 
         String jsonSchema = outputConverter.getJsonSchema();
 
-        String sysMessage = "You are a trip planning bot, respond to the request with locations in their area from the web";
+        String sysMessage = "You are a trip planning bot, respond to the request with locations in their area from the web. Include a start location estimate based on the location they specify.";
         PromptTemplate promptTemplate = new PromptTemplate(prompt.getPrompt());
         Message message = promptTemplate.createMessage();
 

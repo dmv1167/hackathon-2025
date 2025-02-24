@@ -53,8 +53,10 @@ function AiInput({
                 setResponse(airespond.message);
 
                 // Assuming the response contains a list of places
-                const placesData: Place[] = JSON.parse(airespond.message);
-                console.log("Places data:", placesData); // Debugging log
+                const placesData: Place[] = JSON.parse(
+                    airespond.message
+                ).placeList;
+                placesData.unshift(JSON.parse(airespond.message).startLocation); // Debugging log
                 setDests(placesData);
             } catch (error) {
                 console.error("Error fetching data:", error);
@@ -80,42 +82,21 @@ function AiInput({
                     fontSize: "16px",
                 }}
             ></textarea>
-            <div>
-                <strong>Output:</strong>
-                <p>{response}</p>
-            </div>
         </div>
     );
 }
 
-function InfoSection({ start, end }: { start: Place; end: Place }) {
-    console.log("Rendering InfoSection with start:", start, "and end:", end); // Debugging log
-    return (
-        <>
-            <div id="wrap">
-                <details>
-                    <summary>{end.name}</summary>
-                    <div id="detColor">
-                        <div className="mapView">
-                            <MapElement start={start} end={end} />
-                        </div>
-                        <div className="item2">
-                            <p>hey hey hey dragons</p>
-                        </div>
-                        <div className="item3">
-                            <p>trolled</p>
-                        </div>
-                        <div className="item4">
-                            <p>why god</p>
-                        </div>
-                    </div>
-                </details>
-            </div>
-        </>
-    );
-}
-
-function MapElement({ start, end }: { start: Place; end: Place }) {
+function MapElement({
+    start,
+    end,
+    setDistance,
+    setDuration,
+}: {
+    start: Place;
+    end: Place;
+    setDistance: (value: string) => void;
+    setDuration: (value: string) => void;
+}) {
     function Directions() {
         const map = useMap();
         const routesLibrary = useMapsLibrary("routes");
@@ -166,6 +147,9 @@ function MapElement({ start, end }: { start: Place; end: Place }) {
 
         if (!leg) return null;
 
+        setDistance(leg.distance?.text!);
+        setDuration(leg.duration?.text!);
+
         return (
             // div for the directions
             <div className="directions">
@@ -174,8 +158,6 @@ function MapElement({ start, end }: { start: Place; end: Place }) {
                     {leg.start_address.split(",")[0]} to{" "}
                     {leg.end_address.split(",")[0]}
                 </p>
-                <p>Distance: {leg.distance?.text}</p>
-                <p>Duration: {leg.duration?.text}</p>
 
                 <h2>Other Routes</h2>
                 <ul>
@@ -205,16 +187,48 @@ function MapElement({ start, end }: { start: Place; end: Place }) {
     );
 }
 
-function InfoList({ dests }: { dests: Place[] }) {
+function InfoSection({ start, end }: { start: Place; end: Place }) {
+    console.log("Start", start);
+    console.log("End", end);
+    const [distance, setDistance] = useState("");
+    const [duration, setDuration] = useState("");
     return (
         <>
-            {dests.length > 0 &&
-                dests.slice(0, -1).map((_, index) => {
-                    console.log(
-                        "Rendering InfoSection for places:",
-                        dests[index],
-                        dests[index + 1]
-                    ); // Debugging log
+            <div id="wrap">
+                <details>
+                    <summary>{end.name}</summary>
+                    <div id="detColor">
+                        <div className="mapView">
+                            <MapElement
+                                start={start}
+                                end={end}
+                                setDistance={setDistance}
+                                setDuration={setDuration}
+                            />
+                        </div>
+                        <div className="item2">
+                            <p>{end.information}</p>
+                        </div>
+                        <div className="item3">
+                            <p>trolled</p>
+                        </div>
+                        <div className="item4">
+                            <p>Distance: {distance}</p>
+                            <p>Duration: {duration}</p>
+                        </div>
+                    </div>
+                </details>
+            </div>
+        </>
+    );
+}
+
+function InfoList({ dests }: { dests: Place[] }) {
+    console.log(dests);
+    return (
+        <>
+            {dests.map((_, index) => {
+                if (index < dests.length - 1) {
                     return (
                         <InfoSection
                             key={index}
@@ -222,13 +236,15 @@ function InfoList({ dests }: { dests: Place[] }) {
                             end={dests[index + 1]}
                         />
                     );
-                })}
+                }
+                return null;
+            })}
         </>
     );
 }
 
 function App() {
-    const [dests, setDests] = useState<Place[]>([]);
+    const [dests, setDests] = useState<Place[]>([] as Place[]);
     const [prompt, setPrompt] = useState<string>("");
     const [inputValue, setInputValue] = useState<string>("");
     const [response, setResponse] = useState<string>("");
@@ -256,7 +272,6 @@ function App() {
             <div id="cen">
                 <img src="/better.jpg" alt="sunset drive" id="hero"></img>
             </div>
-            <h1 id="col">Have your day planned</h1>
 
             <main>
                 <h1 id="col">Have your day planned</h1>
@@ -270,7 +285,9 @@ function App() {
                 />
                 <button>sendMessage</button>
             </main>
-            <InfoList dests={dests} />
+            <section>
+                <InfoList dests={dests} />
+            </section>
         </>
     );
 }
