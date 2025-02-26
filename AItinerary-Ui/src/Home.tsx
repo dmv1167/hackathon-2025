@@ -1,4 +1,5 @@
 import "./App.css"
+import {NavLink} from "react-router";
 
 function Home() {
   return (
@@ -10,12 +11,12 @@ function Home() {
           id="dom"
         />
         <nav>
-          <a href="home.html" id="back" className="back">
+          <NavLink to="/" id="back" className="back">
             Home
-          </a>
-          <a href="app.html" id="back" className="back">
+          </NavLink>
+          <NavLink to="/chat" id="back" className="back">
             Chat
-          </a>
+          </NavLink>
         </nav>
       </header>
       <hr />

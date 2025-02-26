@@ -6,6 +6,7 @@ import {
 } from "@vis.gl/react-google-maps";
 import { useState, useEffect, KeyboardEvent, ChangeEvent } from "react";
 import "./App.css";
+import {NavLink} from "react-router";
 
 interface Place {
     name: string;
@@ -21,15 +22,11 @@ function AiInput({
     inputValue,
     setInputValue,
     setPrompt,
-    response,
-    setResponse,
     setDests,
 }: {
     inputValue: string;
     setInputValue: (value: string) => void;
     setPrompt: (value: string) => void;
-    response: string;
-    setResponse: (value: string) => void;
     setDests: (places: Place[]) => void;
 }) {
     const handleKeyDown = async (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -50,7 +47,6 @@ function AiInput({
                 });
 
                 const airespond = await result.json(); // Parse the JSON response body
-                setResponse(airespond.message);
 
                 // Assuming the response contains a list of places
                 const placesData: Place[] = JSON.parse(
@@ -60,7 +56,6 @@ function AiInput({
                 setDests(placesData);
             } catch (error) {
                 console.error("Error fetching data:", error);
-                setResponse("An error occurred while fetching data.");
             }
         }
     };
@@ -180,43 +175,49 @@ function MapElement({
                 gestureHandling={"none"}
                 fullscreenControl={false}
                 disableDefaultUI={true}
+                mapId="MainMap"
             >
-                <Directions />
             </Map>
+            <Directions />
         </APIProvider>
     );
 }
 
 function InfoSection({ start, end }: { start: Place; end: Place }) {
-    console.log("Start", start);
-    console.log("End", end);
     const [distance, setDistance] = useState("");
     const [duration, setDuration] = useState("");
+
+    let distanceInfo: string = distance;
+    let durationInfo: string = duration;
+
+    useEffect(() => {
+        distanceInfo = distance;
+        durationInfo = duration;
+    }, [distance, duration]);
+
     return (
         <>
             <div id="wrap">
                 <details>
                     <summary>{end.name}</summary>
-                    <div id="detColor">
-                        <div className="mapView">
-                            <MapElement
-                                start={start}
-                                end={end}
-                                setDistance={setDistance}
-                                setDuration={setDuration}
-                            />
+                        <div id="detColor">
+                            <div className="mapView">
+                                <MapElement
+                                    start={start}
+                                    end={end}
+                                    setDistance={setDistance}
+                                    setDuration={setDuration}
+                                />
+                            </div>
+                            <div className="infoSection">
+                                <p>{end.information}</p>
+                            </div>
                         </div>
-                        <div className="item2">
-                            <p>{end.information}</p>
-                        </div>
-                        <div className="item3">
-                            <p>trolled</p>
-                        </div>
+
                         <div className="item4">
-                            <p>Distance: {distance}</p>
-                            <p>Duration: {duration}</p>
+                            <p>Distance: {distanceInfo}</p>
+                            <p>Duration: {durationInfo}</p>
                         </div>
-                    </div>
                 </details>
             </div>
         </>
@@ -224,7 +225,6 @@ function InfoSection({ start, end }: { start: Place; end: Place }) {
 }
 
 function InfoList({ dests }: { dests: Place[] }) {
-    console.log(dests);
     return (
         <>
             {dests.map((_, index) => {
@@ -247,7 +247,6 @@ function App() {
     const [dests, setDests] = useState<Place[]>([] as Place[]);
     const [prompt, setPrompt] = useState<string>("");
     const [inputValue, setInputValue] = useState<string>("");
-    const [response, setResponse] = useState<string>("");
 
     return (
         <>
@@ -259,12 +258,12 @@ function App() {
                         id="dom"
                     ></img>
                     <nav>
-                        <a href="index.html" id="back" className="back">
+                        <NavLink to="/" id="back" className="back" end>
                             Home
-                        </a>
-                        <a href="chat.html" id="back" className="back">
+                        </NavLink>
+                        <NavLink to="/chat" id="back" className="back" end>
                             Chat
-                        </a>
+                        </NavLink>
                     </nav>
                     <p id="title">AI Day Planner</p>
                 </header>
@@ -279,8 +278,6 @@ function App() {
                     inputValue={inputValue}
                     setInputValue={setInputValue}
                     setPrompt={setPrompt}
-                    response={response}
-                    setResponse={setResponse}
                     setDests={setDests}
                 />
                 <button>sendMessage</button>

@@ -29,7 +29,28 @@ h2 {
     color: white;
     background-color: #2d3748;
     border-radius: 0.25rem;
+    opacity: 0;
 }
+
+.mapInfo {
+    display: flex;
+    justify-content: space-around;
+}
+.mapView {
+    width: 50%;
+    height: 80%;
+}
+
+#MainMap {
+    width: inherit;
+    height: inherit;
+}
+.infoSection {
+    justify-content: center;
+    width: 40%;
+    height: 80%;
+}
+
 ul {
     padding: 0px;
     padding-left: 1.5rem;
@@ -116,13 +137,16 @@ summary {
 #detColor {
     border-radius: 5px;
     padding: 10px;
-    display: grid;
-    grid-template-areas:
-        "map gen"
-        "map gen"
-        "map rev"
-        "inf inf";
-    grid-template-columns: 40% 60%;
+    display: flex;
+    justify-content: space-evenly;
+    height: 80%;
+    /*display: grid;*/
+    /*grid-template-areas:*/
+    /*    "map gen"*/
+    /*    "map gen"*/
+    /*    "map rev"*/
+    /*    "inf inf";*/
+    /*grid-template-columns: 40% 60%;*/
 }
 
 .item1 {
@@ -136,6 +160,8 @@ summary {
 }
 .item4 {
     grid-area: inf;
+    display: flex;
+    justify-content: space-evenly;
 }
 
 #wrap {
