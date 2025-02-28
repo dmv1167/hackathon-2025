@@ -1,34 +1,20 @@
-import "./App.css"
+import "./Home.css"
 import {NavLink} from "react-router";
+import NavBar from "./NavBar.tsx";
 
 function Home() {
   return (
     <>
-      <header>
-        <img
-          src="/—Pngtree—vector%20earth%20globe%20icon_3762811.png"
-          alt="woah"
-          id="dom"
-        />
-        <nav>
-          <NavLink to="/" id="back" className="back">
-            Home
-          </NavLink>
-          <NavLink to="/chat" id="back" className="back">
-            Chat
-          </NavLink>
-        </nav>
-      </header>
-      <hr />
+      <NavBar />
       <main>
         <h1>THE TO DO PLANNER</h1>
         <p>
           Hey this is our hackathon project click the link below to have your
           day planned out
         </p>
-        <a href="chat.html" id="goto">
-          HERE
-        </a>
+        <NavLink to="/chat" id="goto">
+          Click Here
+        </NavLink>
       </main>
     </>
   );

@@ -7,6 +7,7 @@ import {
 import { useState, useEffect, KeyboardEvent, ChangeEvent } from "react";
 import "./App.css";
 import {NavLink} from "react-router";
+import NavBar from "./NavBar.tsx";
 
 interface Place {
     name: string;
@@ -21,42 +22,16 @@ const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY!;
 function AiInput({
     inputValue,
     setInputValue,
-    setPrompt,
-    setDests,
+    handleSubmit,
 }: {
     inputValue: string;
     setInputValue: (value: string) => void;
-    setPrompt: (value: string) => void;
-    setDests: (places: Place[]) => void;
+    handleSubmit: (value: void) => void;
 }) {
     const handleKeyDown = async (e: KeyboardEvent<HTMLTextAreaElement>) => {
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
-            setPrompt(inputValue);
-            setInputValue("");
-
-            if (inputValue.trim() === "") return;
-
-            try {
-                const result = await fetch("http://localhost:8080/aicall", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ prompt: inputValue }),
-                });
-
-                const airespond = await result.json(); // Parse the JSON response body
-
-                // Assuming the response contains a list of places
-                const placesData: Place[] = JSON.parse(
-                    airespond.message
-                ).placeList;
-                placesData.unshift(JSON.parse(airespond.message).startLocation); // Debugging log
-                setDests(placesData);
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            }
+            handleSubmit();
         }
     };
 
@@ -176,6 +151,7 @@ function MapElement({
                 fullscreenControl={false}
                 disableDefaultUI={true}
                 mapId="MainMap"
+                reuseMaps={true}
             >
             </Map>
             <Directions />
@@ -186,14 +162,6 @@ function MapElement({
 function InfoSection({ start, end }: { start: Place; end: Place }) {
     const [distance, setDistance] = useState("");
     const [duration, setDuration] = useState("");
-
-    let distanceInfo: string = distance;
-    let durationInfo: string = duration;
-
-    useEffect(() => {
-        distanceInfo = distance;
-        durationInfo = duration;
-    }, [distance, duration]);
 
     return (
         <>
@@ -215,8 +183,8 @@ function InfoSection({ start, end }: { start: Place; end: Place }) {
                         </div>
 
                         <div className="item4">
-                            <p>Distance: {distanceInfo}</p>
-                            <p>Duration: {durationInfo}</p>
+                            <p>Distance: {distance}</p>
+                            <p>Duration: {duration}</p>
                         </div>
                 </details>
             </div>
@@ -248,26 +216,37 @@ function App() {
     const [prompt, setPrompt] = useState<string>("");
     const [inputValue, setInputValue] = useState<string>("");
 
+    async function handleSubmit() {
+        setPrompt(inputValue);
+        setInputValue("");
+
+        if (inputValue.trim() === "") return;
+
+        try {
+            const result = await fetch("http://localhost:8080/aicall", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ prompt: inputValue }),
+            });
+
+            const airespond = await result.json(); // Parse the JSON response body
+
+            // Assuming the response contains a list of places
+            const placesData: Place[] = JSON.parse(
+                airespond.message
+            ).placeList;
+            placesData.unshift(JSON.parse(airespond.message).startLocation); // Debugging log
+            setDests(placesData);
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        }
+    }
+
     return (
         <>
-            <div className="god">
-                <header>
-                    <img
-                        src="/—Pngtree—vector%20earth%20globe%20icon_3762811.png"
-                        alt="woah"
-                        id="dom"
-                    ></img>
-                    <nav>
-                        <NavLink to="/" id="back" className="back" end>
-                            Home
-                        </NavLink>
-                        <NavLink to="/chat" id="back" className="back" end>
-                            Chat
-                        </NavLink>
-                    </nav>
-                    <p id="title">AI Day Planner</p>
-                </header>
-            </div>
+            <NavBar />
             <div id="cen">
                 <img src="/better.jpg" alt="sunset drive" id="hero"></img>
             </div>
@@ -277,10 +256,9 @@ function App() {
                 <AiInput
                     inputValue={inputValue}
                     setInputValue={setInputValue}
-                    setPrompt={setPrompt}
-                    setDests={setDests}
+                    handleSubmit={handleSubmit}
                 />
-                <button>sendMessage</button>
+                <button onClick={() => handleSubmit()}>Send Message</button>
             </main>
             <section>
                 <InfoList dests={dests} />

@@ -4,6 +4,7 @@ import { BrowserRouter, Route, Routes } from "react-router";
 import "./index.css";
 import App from "./App.tsx";
 import Home from "./Home.tsx";
+import About from "./About.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <BrowserRouter>
@@ -11,6 +12,7 @@ createRoot(document.getElementById("root")!).render(
       <Routes>
         <Route index element={<Home />} />
         <Route path="chat" element={<App />} />
+        <Route path="about" element={<About />} />
       </Routes>
     </StrictMode>
   </BrowserRouter>
