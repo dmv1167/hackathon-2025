@@ -1,0 +1,46 @@
+.git {
+    width: 70px;
+    background: url("/GitHub_Logo.png");
+    background-size: cover;
+    background-color: #dadada;
+    box-shadow: #1a1a1a 2px 2px 2px;
+}
+
+.name-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.gitinfo {
+    position: relative;
+    top: 60px;
+    left: 60px;
+    display: flex;
+    width: 800px;
+    align-items: center;
+    margin-bottom: 50px;
+}
+
+.gitinfo > div {
+    width: fit-content;
+    height: fit-content;
+    margin-left: 10px;
+}
+
+p {
+    color: black;
+}
+
+#project {
+    width: 25%;
+}
+
+ul {
+    color: black;
+    list-style-type: none;
+}
+
+li > p{
+    font-size: 50px;
+}

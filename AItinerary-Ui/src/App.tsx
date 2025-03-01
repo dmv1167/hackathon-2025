@@ -6,7 +6,6 @@ import {
 } from "@vis.gl/react-google-maps";
 import { useState, useEffect, KeyboardEvent, ChangeEvent } from "react";
 import "./App.css";
-import {NavLink} from "react-router";
 import NavBar from "./NavBar.tsx";
 
 interface Place {
@@ -228,8 +227,9 @@ function App() {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ prompt: inputValue }),
+                body: JSON.stringify({ prompt: prompt }),
             });
+            setPrompt("")
 
             const airespond = await result.json(); // Parse the JSON response body
 

@@ -8,7 +8,7 @@
 }
 
 .back:hover {
-    background-color: rgb(255, 255, 255);
+    background-color: #ffcd81;
 }
 
 #goto {
@@ -31,4 +31,8 @@
     position: fixed;
     z-index: 10;
     width: 100%;
+}
+
+#title {
+    color: white;
 }
