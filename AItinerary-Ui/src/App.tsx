@@ -147,6 +147,7 @@ function MapElement({
                 defaultZoom={9}
                 defaultCenter={{ lat: 43.65, lng: -79.38 }}
                 gestureHandling={"none"}
+                keyboardShortcuts={false}
                 fullscreenControl={false}
                 disableDefaultUI={true}
                 mapId="MainMap"
@@ -212,24 +213,23 @@ function InfoList({ dests }: { dests: Place[] }) {
 
 function App() {
     const [dests, setDests] = useState<Place[]>([] as Place[]);
-    const [prompt, setPrompt] = useState<string>("");
     const [inputValue, setInputValue] = useState<string>("");
+    const [buttonText, setButtonText] = useState("Send Message");
 
     async function handleSubmit() {
-        setPrompt(inputValue);
         setInputValue("");
 
         if (inputValue.trim() === "") return;
 
+        setButtonText("Thinking...")
         try {
             const result = await fetch("http://localhost:8080/aicall", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ prompt: prompt }),
+                body: JSON.stringify({ prompt: inputValue }),
             });
-            setPrompt("")
 
             const airespond = await result.json(); // Parse the JSON response body
 
@@ -237,11 +237,12 @@ function App() {
             const placesData: Place[] = JSON.parse(
                 airespond.message
             ).placeList;
-            placesData.unshift(JSON.parse(airespond.message).startLocation); // Debugging log
+            placesData.unshift(JSON.parse(airespond.message).startLocation);
             setDests(placesData);
         } catch (error) {
             console.error("Error fetching data:", error);
         }
+        setButtonText("Send Message")
     }
 
     return (
@@ -258,7 +259,7 @@ function App() {
                     setInputValue={setInputValue}
                     handleSubmit={handleSubmit}
                 />
-                <button onClick={() => handleSubmit()}>Send Message</button>
+                <button onClick={() => handleSubmit()}>{buttonText}</button>
             </main>
             <section>
                 <InfoList dests={dests} />

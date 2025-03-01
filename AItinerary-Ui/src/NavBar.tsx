@@ -3,12 +3,12 @@ import "./NavBar.css"
 
 export default function NavBar() {
     return (
-        <div className="god">
+        <div className="navbar">
             <header>
                 <img
                     src="/—Pngtree—vector%20earth%20globe%20icon_3762811.png"
-                    alt="woah"
-                    id="dom"
+                    alt="AItinerary Logo"
+                    id="logo"
                 ></img>
                 <nav>
                     <NavLink to="/" id="back" className="back" end>

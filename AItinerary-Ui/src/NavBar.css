@@ -11,6 +11,14 @@
     background-color: #ffcd81;
 }
 
+#logo {
+    width: 5%;
+    padding: 10px;
+    margin-top: 5px;
+    margin-left: 10px;
+    justify-content: start;
+}
+
 #goto {
     gap: 20px;
     font-size: 5vw;
@@ -26,7 +34,7 @@
     background-color: rgb(75, 75, 75);
 }
 
-.god {
+.navbar {
     top: 0;
     position: fixed;
     z-index: 10;

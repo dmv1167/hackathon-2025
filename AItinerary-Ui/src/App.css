@@ -72,13 +72,6 @@ body {
 a {
     text-decoration: none;
 }
-#dom {
-    width: 5%;
-    padding: 10px;
-    margin-top: 5px;
-    margin-left: 10px;
-    justify-content: start;
-}
 
 #hero {
     position: absolute;
